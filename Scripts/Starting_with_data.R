@@ -292,7 +292,77 @@ ggsave("C:/Users/ybawin/Documents/DCEcology/Plots/my_first_plot.png", my_plot, w
 #Data manipulation
 library(tidyverse)
 
+surveys <- read_csv("portal_data_joined.csv")
 
+str(surveys) #tbl is a tidyverse dataframe
+#All packages in tidyverse share a common vocabulary and play with each other very nicely
 
+#Command select: how to select columns: first argument is the source and the other arguments are the columns
+select(surveys, plot_id, species_id, weight)
 
+#Filter: works similarly as select
+filter(surveys, year == 1995)
 
+#Filter op meer dan 1 criterium
+surveys2 <- filter(surveys, weight < 5) #Work with an intermediate object
+
+surveys_sml <- select(surveys2, species_id, sex, weight)
+surveys_sml
+
+#No intermediate objects needed
+surveys_sml <- select(filter(surveys, weight < 5), species_id, sex, weight)
+surveys_sml
+
+#Pipe character in tidyverse
+surveys_sml <- surveys %>%
+  filter(weight < 5) %>%
+  select(species_id, sex, weight)
+#If commands are becoming more complicated, the pipes keep it nice and readable
+
+#Challenge
+Challenge <- surveys %>%
+  filter(year < 1995) %>%
+  select(year, sex, weight)
+Challenge
+
+surveys %>%
+  mutate(weight_kg = weight/1000)
+
+surveys %>%
+  mutate(weight_kg = weight/1000, 
+         weight_kg2 = weight_kg*2) %>% #Create a second column after the first one
+  select(year, weight_kg, weight_kg2) %>% #Only select a few columns
+  tail() #Show the last 6 lines
+
+#Challenge2
+
+Challenge2 <- surveys %>%
+  mutate(hindfoot_half = hindfoot_length/2) %>%
+  filter(hindfoot_half != "NA") %>%
+  filter(hindfoot_half < 30) %>%
+  select(species_id, hindfoot_half)
+Challenge2
+
+Challenge2 <- surveys %>%
+  mutate(hindfoot_half = hindfoot_length/2) %>%
+  filter(!is.na(hindfoot_half)) %>%
+  filter(hindfoot_half < 30) %>%
+  select(species_id, hindfoot_half)
+Challenge2
+
+surveys %>%
+  group_by(sex) %>% #group data by sex (split the data based in two groups)
+  summarize(mean_weight = mean(weight, na.rm = TRUE)) #How to show the data and remove missing values
+
+surveys %>%
+  group_by(sex, species_id) %>% #Split the dataset in several groups (each species separate by sex)
+  summarize(mean_weight = mean(weight, na.rm = TRUE))
+
+#Remove missing values before calculations
+summarised_surveys <- surveys %>%
+  filter(!is.na(weight)) %>%
+  group_by(sex, species_id) %>%
+  summarize(mean_weight = mean(weight, na.rm=TRUE))
+
+#How to put this in a nice table
+write_csv(summarised_surveys, path = "C:/Users/ybawin/Documents/DCEcology/Plots/surveys_sex_species_weight.csv")
