@@ -366,3 +366,74 @@ summarised_surveys <- surveys %>%
 
 #How to put this in a nice table
 write_csv(summarised_surveys, path = "C:/Users/ybawin/Documents/DCEcology/Plots/surveys_sex_species_weight.csv")
+
+#R and SQL
+
+# Installing new packages ----
+install.packages("dbplyr")
+install.packages("RSQLite") 
+
+# Load the libraries ----
+library(dplyr)
+library(dbplyr)
+library(DBI)
+install.packages("RSQLite")
+library(RSQLite)
+
+download.file(url = "https://ndownloader.figshare.com/files/2292171",
+              destfile = "portal_mammals.sqlite", mode = "wb")
+# If you add '----' after a command, you create a section (which can be opened and collapsed)
+
+#Create a connection to the sqlite database
+
+DBconnection <- DBI::dbConnect(RSQLite::SQLite(),"portal_mammals.sqlite") #:: syntaxis is a longer and very explicit way to tell where the function comes from
+str(DBconnection)
+
+#Looking into DBConnection
+dbplyr::src_dbi(DBconnection) #source_database_interface
+
+#interacting with tables
+surveys <- dplyr::tbl(DBconnection,"surveys") #The column name must be specified between the quotation marks
+
+species <- dplyr::tbl(DBconnection, "species")
+plots <- dplyr::tbl(DBconnection, "plots")
+head(surveys)
+nrow(surveys) #Does not give the number of rows, because the connection does not have all rows loaded in R
+
+surveys %>%
+  filter(year == 2002, weight > 220)
+#dplyr is a translation of sql code:
+show_query(surveys %>%
+             filter(year == 2002, weight > 220))
+
+#write a dplyr mutate on surveys to add a column called mean_weight
+
+surveys %>%
+  mutate(Weight_kg = weight/1000)
+show_query(surveys %>%
+             mutate(Weight_kg = weight/1000))
+
+#filter data with dplyr
+# Make a subset of your data and plot it
+surveys2002 <- surveys %>% 
+  filter(year == 2002) %>% 
+  as.data.frame() #Creates observations in the object (you can work with this)
+
+library(ggplot2)  
+ggplot(data = surveys2002, aes(weight, colour = "red")) +
+  stat_density(geom = "line", size = 2, position = "identity") +
+  theme_classic() +
+  theme(legend.position = "none")
+
+#Challenge
+#Make one chunck of code to do the subset and the plot
+surveys2002 <- surveys %>% 
+  filter(year == 2002) %>% 
+  as.data.frame() %>%
+  ggplot(aes(weight, colour = "red")) +
+  stat_density(geom = "line", size = 2, position = "identity") +
+  theme_classic() +
+  theme(legend.position = "none")
+
+write_csv(surveys2002, path="")
+  
