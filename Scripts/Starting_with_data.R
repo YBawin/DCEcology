@@ -136,3 +136,48 @@ head(missing_dates)
 
 #The data are not missing, but the data do not exist in real life (e.g. 31st of september, september only has 30 days)
 
+
+#Data visualisation
+
+download.file("https://ndownloader.figshare.com/files/11930600?private_link=fe0cd1848e06456e6f38","surveys_complete.csv")
+
+#Load file in R
+#read_csv = specific method from the tidyverse package; it does not read characters by default as characters
+surveys_complete <- read_csv("surveys_complete.csv")
+
+#Basic ggplot2 template
+#Maybe a bit confusing: first ggplot command and then additional commands to visualise
+ggplot(data = surveys_complete)
+#Looks like nothing happened, but this is normal
+ggplot(data = surveys_complete, aes(x = weight, y = hindfoot_length))
+#Gives a little bit more, but still no information what kind of plot I want
+ggplot(data = surveys_complete, aes(x = weight, y = hindfoot_length)) + 
+  geom_point()
+#Scatterplot is made!!!
+
+ggplot(data = surveys_complete, aes(x = weight)) + 
+  geom_bar()
+
+#Barplot is made!!!
+
+#Scatterplot lijkt niet echt mooi (veel data overlap in het midden)
+
+ggplot(data = surveys_complete, aes(x = weight, y = hindfoot_length)) + 
+  geom_point(alpha = 0.1)
+
+  #Alpha verandert transparantie van punt
+
+ggplot(data = surveys_complete, aes(x = weight, y = hindfoot_length)) + 
+  geom_point(alpha = 0.1, color="springgreen4")
+
+  #Change the color to a different color
+ggplot(data = surveys_complete, aes(x = weight, y = hindfoot_length)) + 
+  geom_point(alpha = 0.1, aes(color=species_id))
+
+  #If you want to add a trend line with separate aesthetics: add the aes within the geom_point (otherswise it will 
+  #use this option for all plots in the command (e.g. trend line))
+ggplot(data = surveys_complete, aes(x = weight, y = hindfoot_length)) + 
+  geom_point(alpha = 0.1, aes(color=species_id))
+
+
+
