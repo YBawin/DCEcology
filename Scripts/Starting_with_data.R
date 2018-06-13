@@ -176,8 +176,123 @@ ggplot(data = surveys_complete, aes(x = weight, y = hindfoot_length)) +
 
   #If you want to add a trend line with separate aesthetics: add the aes within the geom_point (otherswise it will 
   #use this option for all plots in the command (e.g. trend line))
-ggplot(data = surveys_complete, aes(x = weight, y = hindfoot_length)) + 
-  geom_point(alpha = 0.1, aes(color=species_id))
+#Challenge: a good plot?
+ggplot(data = surveys_complete, aes(x = species_id, y = weight)) + 
+  geom_point(alpha = 0.1, aes(color=plot_id))
+
+#No, better way to show these data is a boxplot
+ggplot(data = surveys_complete, aes(x = species_id, y = weight)) + 
+  geom_boxplot()
+
+#Add multiple geoms to the ggplot command: add points behind the boxplots to have an idea about the number of observations
+ggplot(data = surveys_complete, aes(x = species_id, y = weight)) + 
+  geom_jitter(alpha=0.3, aes(color=plot_id)) + geom_boxplot()
+
+surveys_complete$plot_id <- factor(surveys_complete$plot_id)
+
+ggplot(data = surveys_complete, aes(x = species_id, y = weight)) + 
+  geom_jitter(alpha=0.3, aes(color=plot_id)) + geom_boxplot()
+
+#Challenge:
+ #violin plots
+ggplot(data = surveys_complete, aes(x = species_id, y = weight)) + 
+  geom_violin()
+ #Change scale
+ggplot(data = surveys_complete, aes(x = species_id, y=weight)) + 
+  geom_violin() + scale_y_log10()
+
+ggplot(data = surveys_complete, aes(x = species_id, y = hindfoot_length)) + 
+  geom_jitter(alpha=0.3, aes(color=plot_id)) + geom_boxplot()
+
+#Visualising time differences
+ #Create a new object for 
+yearly_count <- surveys_complete %>%
+  group_by(year, species_id) %>%
+  tally()
+#Plotting counts per time interval (n = number of species observed in that year)
+ggplot(data = yearly_count, aes(x=year, y=n)) + geom_line()
+
+#Create a seperate line for each species
+ggplot(data = yearly_count, aes(x=year, y=n, group=species_id)) + geom_line()
+
+#Color each species line
+ggplot(data = yearly_count, aes(x=year, y=n, color=species_id)) + geom_line()
+
+#Create a plot for each species separately using facet_wrap (break-up the data in separate figures)
+ggplot(data=yearly_count, aes(x=year,y=n)) + geom_line() + facet_wrap(~ species_id)
+
+#Look at counts of males and females per year (previous figure, but with separate lines for males and females)
+#Make new object
+yearly_sex_counts <- surveys_complete %>%
+  group_by(year, species_id, sex) %>%
+  tally()
+
+ggplot(data = yearly_sex_counts, aes(x = year, y = n, color=sex)) +
+  geom_line() + facet_wrap(~species_id)
+
+ggplot(data = yearly_sex_counts, aes(x = year, y = n, color=sex)) +
+  geom_line() + facet_wrap(~species_id) +
+  theme_bw() + #removes background colour
+  theme(panel.grid = element_blank()) #removes background grid
+
+#Add a titel to the graph
+ggplot(data = yearly_sex_counts, aes(x = year, y = n, color=sex)) +
+  geom_line() + facet_wrap(~species_id) +
+  theme_bw() + #removes background colour
+  theme(panel.grid = element_blank()) + #removes background grid
+  labs(title = "Observed species over time", x = "Year of observation", y = "Number of observations")
+
+#Change the text size
+#Add a titel to the graph
+ggplot(data = yearly_sex_counts, aes(x = year, y = n, color=sex)) +
+  geom_line() + facet_wrap(~species_id) +
+  theme_bw() + #removes background colour
+  theme(panel.grid = element_blank(), text = element_text(size=16)) + #removes background grid and increase text size
+  labs(title = "Observed species over time", x = "Year of observation", y = "Number of observations")
+
+ggplot(data = yearly_sex_counts, aes(x = year, y = n, color=sex)) +
+  geom_line() + facet_wrap(~species_id) +
+  theme_bw() + #removes background colour
+  theme(panel.grid = element_blank(), text = element_text(size=16), axis.text.x = element_text(color="grey20", size=12, angle=90, hjust=0.5, vjust=0.5)) + #removes background grid and increase text size
+  labs(title = "Observed species over time", x = "Year of observation", y = "Number of observations")
+#Kan ook als afzonderlijk thema worden opgeslagen
+grey_theme <- theme(panel.grid = element_blank(), text = element_text(size=16), axis.text.x = element_text(color="grey20", size=12, angle=90, hjust=0.5, vjust=0.5))
+ggplot(data = yearly_sex_counts, aes(x = year, y = n, color='slateblue3')) +
+  geom_line() + facet_wrap(~species_id) +
+  theme_bw() + #removes background colour + #removes background grid and increase text size
+  grey_theme +
+  labs(title = "Observed species over time", x = "Year of observation", y = "Number of observations")
+colors()
+
+ggplot(data = suerveys_complete, aes(fill=conditions, x = sex, y=value)) +
+  geom_bar(stat="sex")
+  theme_bw() + #removes background colour
+  theme(panel.grid = element_blank(), text = element_text(size=16), axis.text.x = element_text(color="grey20", size=12, angle=90, hjust=0.5, vjust=0.5)) + #removes background grid and increase text size
+  labs(title = "Observed species over time", x = "Year of observation", y = "Number of observations")
+  
+#How to save an image as high resolution: ggsave
+
+  #Step1: assign your plot to an object
+
+my_plot <- ggplot(data = yearly_sex_counts, aes(x = year, y = n, color='slateblue3')) +
+  geom_line() + facet_wrap(~species_id) +
+  theme_bw() + #removes background colour + #removes background grid and increase text size
+  grey_theme +
+  labs(title = "Observed species over time", x = "Year of observation", y = "Number of observations")
+my_plot
+
+yellow_theme <- theme(panel.grid = element_blank(), text = element_text(size=16), axis.text.x = element_text(color="yellow", size=12, angle=90, hjust=0.5, vjust=0.5))
+
+my_plot + yellow_theme
+
+#For journals: use vector-based figures (can be infinitely scaled), PNG = raster (pixels)
+#When you want to adjust a detail on your figure; save it as pdf and load it in inskape
+ggsave("C:/Users/ybawin/Documents/DCEcology/Plots/my_first_plot.png", my_plot, width = 15, height = 10, dpi = 300)
+
+#Data manipulation
+library(tidyverse)
+
+
 
 
 
